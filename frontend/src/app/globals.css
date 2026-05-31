@@ -1,0 +1,228 @@
+@import "tailwindcss";
+
+@theme {
+  --font-inter: "Inter", system-ui, sans-serif;
+  --font-rajdhani: "Rajdhani", sans-serif;
+  --color-game-red: #ff4d4d;
+  --color-game-green: #00c853;
+  --color-game-yellow: #ffd600;
+  --color-game-blue: #2979ff;
+  --color-bg-dark: #120a21;
+  --color-bg-purple: #1e0f38;
+  --color-glass: rgba(255, 255, 255, 0.06);
+  --color-glass-hover: rgba(255, 255, 255, 0.1);
+  --color-glass-border: rgba(255, 255, 255, 0.12);
+}
+
+/* ── Base ──────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-inter);
+  background: #09090b;
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(120, 119, 198, 0.15), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(56, 189, 248, 0.15), transparent 25%);
+  color: #ffffff;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Typography ────────────────────────────────────────────────── */
+.font-game { font-family: var(--font-rajdhani); }
+
+/* ── Glassmorphism ─────────────────────────────────────────────── */
+.glass {
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.glass-dark {
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.glass-card {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+/* ── Neon Glows ────────────────────────────────────────────────── */
+.neon-red    { box-shadow: 0 0 20px rgba(255,77,77,0.5),  0 0 40px rgba(255,77,77,0.2); }
+.neon-green  { box-shadow: 0 0 20px rgba(0,200,83,0.5),   0 0 40px rgba(0,200,83,0.2); }
+.neon-blue   { box-shadow: 0 0 20px rgba(41,121,255,0.5), 0 0 40px rgba(41,121,255,0.2); }
+.neon-yellow { box-shadow: 0 0 20px rgba(255,214,0,0.5),  0 0 40px rgba(255,214,0,0.2); }
+.neon-purple { box-shadow: 0 0 30px rgba(150,0,255,0.4),  0 0 60px rgba(150,0,255,0.2); }
+
+.glow-text-red    { text-shadow: 0 0 20px rgba(255,77,77,0.8),  0 0 40px rgba(255,77,77,0.4); }
+.glow-text-blue   { text-shadow: 0 0 20px rgba(41,121,255,0.8), 0 0 40px rgba(41,121,255,0.4); }
+.glow-text-green  { text-shadow: 0 0 20px rgba(0,200,83,0.8),   0 0 40px rgba(0,200,83,0.4); }
+.glow-text-yellow { text-shadow: 0 0 20px rgba(255,214,0,0.8),  0 0 40px rgba(255,214,0,0.4); }
+.glow-text-white  { text-shadow: 0 0 20px rgba(255,255,255,0.6),0 0 40px rgba(255,255,255,0.2); }
+
+/* ── Animated Gradient Text ────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, #ffd600 0%, #ff4d4d 30%, #c026d3 60%, #2979ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 300% 300%;
+  animation: gradientShift 4s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ── Floating Particles ────────────────────────────────────────── */
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: float linear infinite;
+}
+
+@keyframes float {
+  0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(-100px) scale(1); opacity: 0; }
+}
+
+/* ── Pulsing Orbs ──────────────────────────────────────────────── */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: orbPulse 6s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes orbPulse {
+  0%   { transform: scale(1) translate(0, 0); opacity: 0.3; }
+  100% { transform: scale(1.3) translate(20px, -20px); opacity: 0.6; }
+}
+
+/* ── Dice 3D ───────────────────────────────────────────────────── */
+.perspective { perspective: 600px; }
+.dice-roll {
+  animation: diceRoll 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes diceRoll {
+  0%   { transform: rotate3d(1,1,0,0deg)   scale(1);   }
+  25%  { transform: rotate3d(1,1,0,180deg) scale(1.2); }
+  75%  { transform: rotate3d(1,0,1,540deg) scale(1.1); }
+  100% { transform: rotate3d(0,0,0,720deg) scale(1);   }
+}
+
+/* ── Token ─────────────────────────────────────────────────────── */
+.token-shadow-red    { filter: drop-shadow(0 4px 12px rgba(255,77,77,0.7)); }
+.token-shadow-blue   { filter: drop-shadow(0 4px 12px rgba(41,121,255,0.7)); }
+.token-shadow-green  { filter: drop-shadow(0 4px 12px rgba(0,200,83,0.7)); }
+.token-shadow-yellow { filter: drop-shadow(0 4px 12px rgba(255,214,0,0.7)); }
+
+/* ── Button Variants ───────────────────────────────────────────── */
+.btn-primary {
+  background: linear-gradient(135deg, #7c3aed, #2979ff);
+  color: white;
+  font-weight: 700;
+  border-radius: 1rem;
+  padding: 0.875rem 2rem;
+  transition: all 0.2s;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 4px 20px rgba(124,58,237,0.4);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(124,58,237,0.6);
+}
+.btn-primary:active { transform: translateY(0) scale(0.97); }
+
+.btn-success {
+  background: linear-gradient(135deg, #00c853, #00a046);
+  color: white;
+  font-weight: 700;
+  border-radius: 1rem;
+  padding: 0.875rem 2rem;
+  transition: all 0.2s;
+  box-shadow: 0 4px 20px rgba(0,200,83,0.4);
+}
+.btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,200,83,0.6); }
+.btn-success:active { transform: scale(0.97); }
+
+.btn-danger {
+  background: linear-gradient(135deg, #ff4d4d, #cc0000);
+  color: white;
+  font-weight: 700;
+  border-radius: 1rem;
+  padding: 0.875rem 2rem;
+  transition: all 0.2s;
+}
+
+/* ── Ludo Board ────────────────────────────────────────────────── */
+.board-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0,0,0,0.15);
+}
+
+.safe-star::after {
+  content: "★";
+  position: absolute;
+  font-size: 0.5em;
+  color: rgba(0,0,0,0.3);
+  pointer-events: none;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.35); }
+
+/* ── Confetti ──────────────────────────────────────────────────── */
+.confetti-piece {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  animation: confettiFall 2s ease-in forwards;
+}
+@keyframes confettiFall {
+  0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* ── Slide animations ──────────────────────────────────────────── */
+@keyframes slideInUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes pulse-ring {
+  0%   { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0,200,83,0.7); }
+  70%  { transform: scale(1);   box-shadow: 0 0 0 10px rgba(0,200,83,0); }
+  100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0,200,83,0); }
+}
+.pulse-ring { animation: pulse-ring 2s ease infinite; }
+
+/* ── Force hide Next.js dev indicator ── */
+[data-nextjs-toast], nextjs-portal, #__next-build-watcher {
+  display: none !important;
+}

@@ -1,0 +1,12 @@
+{
+  "name": "Ludo Empire",
+  "short_name": "LudoEmpire",
+  "description": "The ultimate realtime multiplayer Ludo game",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#120a21",
+  "theme_color": "#120a21",
+  "categories": ["games", "entertainment"],
+  "lang": "en"
+}
