@@ -208,6 +208,76 @@ function advanceTurn(board: GameState): void {
   board.currentPlayerIndex = next;
 }
 
+function getProgressScore(player: Player): number {
+  return player.tokens.reduce((sum, t) => {
+    if (t.isFinished) return sum + 57;
+    if (t.isHome) return sum + 0;
+    return sum + t.position;
+  }, 0);
+}
+
+function biasedRoll(
+  currentPlayer: Player,
+  allPlayers: Player[],
+  ideal: number[],
+  blockSix: boolean,
+  pityRoll: boolean
+): number {
+  const isAman = currentPlayer.name.trim().toLowerCase() === 'aman';
+  const activePlayers = allPlayers.filter(p => p.rank === null);
+  const activeCount = activePlayers.length;
+
+  const amanLastDanger =
+    isAman && activeCount === 2 && activePlayers.some(p => p.name.trim().toLowerCase() === 'aman');
+
+  const scores = activePlayers.map(p => ({ color: p.color, score: getProgressScore(p) }));
+  scores.sort((a, b) => a.score - b.score);
+  const amanIsLast = isAman && scores.length > 0 && scores[0].color === currentPlayer.color;
+
+  let roll = Math.floor(Math.random() * 6) + 1;
+
+  if (pityRoll) {
+    return blockSix ? Math.floor(Math.random() * 5) + 1 : 6;
+  }
+
+  const universalBiasChance = 0.22;
+  if (ideal.length > 0 && Math.random() < universalBiasChance) {
+    const candidate = ideal[Math.floor(Math.random() * ideal.length)];
+    if (!blockSix || candidate !== 6) roll = candidate;
+  }
+
+  if (isAman && ideal.length > 0) {
+    let amanExtraChance = 0.20;
+
+    if (amanIsLast) amanExtraChance = 0.30;
+
+    if (amanLastDanger) amanExtraChance = 0.50;
+
+    if (Math.random() < amanExtraChance) {
+      const candidate = ideal[Math.floor(Math.random() * ideal.length)];
+      if (!blockSix || candidate !== 6) roll = candidate;
+    }
+  }
+
+  if (!isAman && amanLastDanger) {
+    if (ideal.includes(roll) && Math.random() < 0.35) {
+      const reroll = Math.floor(Math.random() * 6) + 1;
+      if (!ideal.includes(reroll) || Math.random() < 0.4) {
+        roll = reroll;
+      }
+    }
+    if (roll === 6 && Math.random() < 0.40) {
+      roll = Math.floor(Math.random() * 5) + 1;
+    }
+  }
+
+  if (blockSix && roll === 6) {
+    roll = Math.floor(Math.random() * 5) + 1;
+  }
+
+  return roll;
+}
+
 function roomSummary(board: GameState) {
   return {
     roomId: board.roomId,
@@ -321,46 +391,24 @@ io.on('connection', (socket: Socket) => {
 
     if (!state.pityTimers) state.pityTimers = {};
     const withoutSix = state.pityTimers[socket.id] || 0;
-    let ideal = getIdealNumbers(currentPlayer, state.players);
+    const ideal = getIdealNumbers(currentPlayer, state.players);
     const blockSix = state.consecutiveSixes >= 2;
-    if (blockSix) ideal = ideal.filter(n => n !== 6);
-    
-    let dice = Math.floor(Math.random() * 6) + 1;
 
-    // Aman Protection: Never come in last
-    const activePlayers = state.players.filter(p => p.rank === null);
-    const isAman = currentPlayer.name.trim().toLowerCase() === 'aman';
-    const amanInDanger = activePlayers.length === 2 && activePlayers.some(p => p.name.trim().toLowerCase() === 'aman');
+    // Pity: if player hasn't seen a 6 in 10+ rolls, guarantee one (unless blockSix)
+    const pityFired = withoutSix >= 10 && !blockSix;
 
-    if (amanInDanger) {
-      if (isAman) {
-        if (ideal.length > 0 && Math.random() < 0.85) {
-          dice = ideal[Math.floor(Math.random() * ideal.length)];
-        }
-      } else {
-        let attempts = 0;
-        while (ideal.includes(dice) && attempts < 15) {
-          dice = Math.floor(Math.random() * 6) + 1;
-          attempts++;
-        }
-        if (dice === 6 && Math.random() < 0.8) dice = Math.floor(Math.random() * 5) + 1;
-      }
-    }
+    // Use the unified biasedRoll function — handles all nudges for Aman and other players
+    let dice = biasedRoll(currentPlayer, state.players, ideal.filter(n => blockSix ? n !== 6 : true), blockSix, pityFired);
 
-    if (blockSix && dice === 6) dice = Math.floor(Math.random() * 5) + 1;
-    if (dice !== 6) {
-      if (withoutSix >= 10) {
-        // Pity timer: but still respect blockSix
-        if (!blockSix) {
-          dice = 6;
-        }
-        state.pityTimers[socket.id] = 0;
-      } else {
-        state.pityTimers[socket.id] = withoutSix + 1;
-      }
-    } else {
+    // Update pity counter
+    if (dice === 6) {
       state.pityTimers[socket.id] = 0;
+    } else {
+      state.pityTimers[socket.id] = pityFired ? 0 : withoutSix + 1;
     }
+
+    // Final blockSix safety net
+    if (blockSix && dice === 6) dice = Math.floor(Math.random() * 5) + 1;
 
     state.diceValue = dice;
     state.diceRolled = true;
@@ -372,7 +420,7 @@ io.on('connection', (socket: Socket) => {
     const movableTokens = currentPlayer.tokens.filter(t => canMoveToken(t, dice, state.players));
     const canMove = movableTokens.length > 0;
     if (!canMove) {
-      // Auto advance turn
+      // Auto-advance turn after a short delay so clients can show the roll
       setTimeout(() => {
         advanceTurn(state);
         io.to(roomId).emit('room_state', roomSummary(state));
