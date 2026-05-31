@@ -48,6 +48,7 @@ function TokenPiece({ token, isMovable, isKilled, onClick }: {
 }) {
   const fill = QUAD_COLOR[token.color];
   const light = COLOR_CLASSES[token.color].light;
+  const id = token.id;
 
   return (
     <motion.div
@@ -57,7 +58,7 @@ function TokenPiece({ token, isMovable, isKilled, onClick }: {
         isKilled
           ? { scale: [1, 1.5, 0], opacity: [1, 1, 0] }
           : isMovable
-          ? { y: [0, -6, 0], opacity: 1, filter: [`drop-shadow(0 0 0px ${light})`, `drop-shadow(0 0 6px ${light})`, `drop-shadow(0 0 0px ${light})`] }
+          ? { y: [0, -6, 0], opacity: 1, filter: [`drop-shadow(0 0 0px ${light})`, `drop-shadow(0 0 8px ${light})`, `drop-shadow(0 0 0px ${light})`] }
           : { scale: 1, y: 0, opacity: 1 }
       }
       transition={isMovable ? { repeat: Infinity, duration: 0.9 } : isKilled ? { duration: 0.4 } : { type: 'spring', stiffness: 500 }}
@@ -65,71 +66,50 @@ function TokenPiece({ token, isMovable, isKilled, onClick }: {
       whileTap={isMovable ? { scale: 0.9 } : {}}
       className={`w-full h-full relative ${isMovable ? 'cursor-pointer' : 'cursor-default'}`}
     >
-      <svg viewBox="0 0 100 140" className="w-full h-full" style={{ overflow: 'visible', filter: 'drop-shadow(0px 4px 6px rgba(0,0,0,0.5))' }}>
+      <svg viewBox="0 0 100 130" className="w-full h-full" style={{ overflow: 'visible', filter: 'drop-shadow(0px 4px 8px rgba(0,0,0,0.55))' }}>
         <defs>
-          <linearGradient id={`helmet-${token.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor={light} />
-            <stop offset="70%" stopColor={fill} />
-            <stop offset="100%" stopColor="#222" />
-          </linearGradient>
-          <linearGradient id="visor-glare" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="rgba(255,255,255,0.7)" />
-            <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-          </linearGradient>
-          <linearGradient id="mouthplate" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#ffffff" />
-            <stop offset="100%" stopColor="#999999" />
-          </linearGradient>
+          {/* Body radial gradient — bright highlight top-left, full colour toward bottom */}
+          <radialGradient id={`body-${id}`} cx="36%" cy="30%" r="70%">
+            <stop offset="0%"   stopColor="rgba(255,255,255,0.95)" />
+            <stop offset="22%"  stopColor={light} />
+            <stop offset="100%" stopColor={fill} />
+          </radialGradient>
         </defs>
-        
-        {/* Ground shadow */}
-        <ellipse cx="50" cy="136" rx="28" ry="6" fill="rgba(0,0,0,0.4)" />
 
-        {/* Main Helmet Base */}
-        <path 
-          d="M 12,55 C 12,-5 88,-5 88,55 C 88,100 75,135 50,135 C 25,135 12,100 12,55 Z" 
-          fill={`url(#helmet-${token.id})`} 
-          stroke="#111" 
-          strokeWidth="2.5" 
-        />
+        {/* Ground shadow ellipse */}
+        <ellipse cx="50" cy="127" rx="17" ry="5" fill="rgba(0,0,0,0.32)" />
 
-        {/* Silver Mouthplate */}
-        <path 
-          d="M 36,95 L 64,95 L 56,132 L 44,132 Z" 
-          fill="url(#mouthplate)" 
-          stroke="#111" 
-          strokeWidth="2" 
+        {/* ── Main pin / teardrop body ── */}
+        <path
+          d="M 50,120 C 26,97 7,77 7,45 A 43,43 0 1 1 93,45 C 93,77 74,97 50,120 Z"
+          fill={`url(#body-${id})`}
+          stroke="rgba(0,0,0,0.75)"
+          strokeWidth="3"
           strokeLinejoin="round"
         />
-        
-        {/* Mouthplate details (horizontal vents) */}
-        <line x1="42" y1="103" x2="58" y2="103" stroke="#222" strokeWidth="1.5" strokeLinecap="round" />
-        <line x1="43" y1="111" x2="57" y2="111" stroke="#222" strokeWidth="1.5" strokeLinecap="round" />
-        <line x1="44" y1="119" x2="56" y2="119" stroke="#222" strokeWidth="1.5" strokeLinecap="round" />
 
-        {/* Forehead Gem */}
-        <polygon 
-          points="50,10 62,24 50,38 38,24" 
-          fill="url(#mouthplate)" 
-          stroke="#111" 
-          strokeWidth="1.5" 
-          strokeLinejoin="round" 
+        {/* Outer dark halo around the circle head */}
+        <circle cx="50" cy="45" r="31" fill="none" stroke="rgba(20,20,20,0.55)" strokeWidth="5" />
+
+        {/* White ring */}
+        <circle cx="50" cy="45" r="27" fill="white" />
+
+        {/* Dark / shadow ring */}
+        <circle cx="50" cy="45" r="22" fill="rgba(15,15,15,0.82)" />
+
+        {/* Coloured inner circle */}
+        <circle cx="50" cy="45" r="17" fill={fill} />
+
+        {/* Crescent highlight — upper-left glare */}
+        <ellipse
+          cx="43" cy="36"
+          rx="8" ry="5.5"
+          fill="rgba(255,255,255,0.60)"
+          transform="rotate(-20 43 36)"
         />
 
-        {/* Iconic T-Visor */}
-        <path 
-          d="M 12,40 L 88,40 L 88,55 L 60,55 L 50,90 L 40,55 L 12,55 Z" 
-          fill="#111111" 
-          stroke="#e0e0e0" 
-          strokeWidth="2.5" 
-          strokeLinejoin="round" 
-        />
-        
-        {/* Visor Glare (shine effect) */}
-        <path 
-          d="M 14,43 L 50,43 L 42,55 L 14,55 Z" 
-          fill="url(#visor-glare)" 
-        />
+        {/* Tiny bright dot centre-highlight */}
+        <circle cx="45" cy="39" r="3" fill="rgba(255,255,255,0.38)" />
       </svg>
     </motion.div>
   );
